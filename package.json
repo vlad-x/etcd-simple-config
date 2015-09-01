@@ -1,0 +1,29 @@
+{
+  "name": "etcd-simple-config",
+  "version": "1.0.0",
+  "description": "Simple config management with Etcd",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/vlad-x/etcd-simple-config.git"
+  },
+  "keywords": [
+    "etcd",
+    "config",
+    "watch"
+  ],
+  "author": "vlad-x",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/vlad-x/etcd-simple-config/issues"
+  },
+  "homepage": "https://github.com/vlad-x/etcd-simple-config",
+  "dependencies": {
+    "extend": "^3.0.0",
+    "flat": "^1.6.0",
+    "node-etcd": "^4.1.0"
+  }
+}
