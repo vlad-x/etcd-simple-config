@@ -1,6 +1,6 @@
 {
   "name": "etcd-simple-config",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Simple config management with Etcd",
   "main": "index.js",
   "scripts": {

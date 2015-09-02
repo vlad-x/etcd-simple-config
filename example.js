@@ -25,6 +25,17 @@ var config = etcdConfig.bind(prefix, defaultConfig, function(key, change){
 
 console.log('config', config);
 
+// or listen for the 'change' event instead of the callback
+config.on('change', function(key, change){
+	console.log('on change', arguments);
+});
+
+// or listen for a single field change
+config.on('change:max_requests', function(key, change){
+	console.log('on max_requests change', arguments);
+});
+
+
 // add or update values
 etcdConfig.set(prefix, { another_value: 'Another value' });
 etcdConfig.set(prefix, { max_requests: 3 });

@@ -2,6 +2,7 @@ var Etcd = require('node-etcd');
 var flatten = require('flat');
 var unflatten = flatten.unflatten;
 var extend = require('extend');
+var EventEmitter = require('events').EventEmitter;
 
 function EtcdSimpleConfig(host, port) {
   if (host instanceof Array){
@@ -71,13 +72,16 @@ EtcdSimpleConfig.prototype.bind = function(prefix, defaultObj, watch) {
   if (watch) {
     var watcher = this.etcd.watcher(prefix, null, {recursive: true});
 
+    var e = new EventEmitter();
+    obj.__proto__ = e.__proto__;
+
     var self = this;
     watcher.on('change', function(req) {
       var changeKey = req.node.key.replace(prefix, '');
       while (changeKey.indexOf('/') == 0) {
         changeKey = changeKey.substr(1);
       }
-      var obj = {};
+      var change = {};
       if (!req.node.value) {
         // value deleted
         var parts = changeKey.split('/');
@@ -95,17 +99,19 @@ EtcdSimpleConfig.prototype.bind = function(prefix, defaultObj, watch) {
           delete pointer[parts[0]];
         }
       } else {
-        obj[changeKey] = req.node.value;
+        change[changeKey] = req.node.value;
       }
 
-      obj = unflatten(obj, { safe: true, delimiter: '/' });
+      var change = unflatten(change, { safe: true, delimiter: '/' });
       if (self.store[prefix]) {
-        extend(true, self.store[prefix], obj);
+        extend(true, self.store[prefix], change);
       }
-      process.env.DEBUG && console.log('change', changeKey, obj);
+      process.env.DEBUG && console.log('change', changeKey, change);
       if (typeof watch == 'function') {
-        watch(changeKey, obj);
+        watch(changeKey, change);
       }
+      obj.emit('change', changeKey, change);
+      obj.emit('change:'+changeKey, change);
     });
   }
   return obj;
