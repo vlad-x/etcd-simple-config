@@ -1,6 +1,8 @@
 # etcd-simple-config
 Simple config management with Etcd
 
+`npm install etcd-simple-config --save`
+
 See [example.js] (https://github.com/vlad-x/etcd-simple-config/blob/master/example.js)
 
 ## API
