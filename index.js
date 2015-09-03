@@ -2,6 +2,7 @@ var Etcd = require('node-etcd');
 var flatten = require('flat');
 var unflatten = flatten.unflatten;
 var extend = require('extend');
+var subordinate = require('subordinate');
 var EventEmitter = require('events').EventEmitter;
 var cluster = require('cluster');
 
@@ -84,6 +85,7 @@ EtcdSimpleConfig.prototype.bind = function(prefix, defaultObj, watch) {
         changeKey = changeKey.substr(1);
       }
       var change = {};
+      var wasChanged = false;
       if (!req.node.value) {
         // value deleted
         var parts = changeKey.split('/');
@@ -106,14 +108,19 @@ EtcdSimpleConfig.prototype.bind = function(prefix, defaultObj, watch) {
 
       var change = unflatten(change, { safe: true, delimiter: '/' });
       if (self.store[prefix]) {
-        extend(true, self.store[prefix], change);
+        if (!subordinate(self.store[prefix], change)) {
+          extend(true, self.store[prefix], change);
+          wasChanged = true;
+        }
       }
-      process.env.DEBUG && console.log('change', changeKey, change);
-      if (typeof watch == 'function') {
-        watch(changeKey, change);
+      if (wasChanged) {
+        process.env.DEBUG && console.log('change', changeKey, change);
+        if (typeof watch == 'function') {
+          watch(changeKey, change);
+        }
+        obj.emit('change', changeKey, change);
+        obj.emit('change:'+changeKey, change);
       }
-      obj.emit('change', changeKey, change);
-      obj.emit('change:'+changeKey, change);
     });
   }
   return obj;
