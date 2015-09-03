@@ -15,6 +15,17 @@ function EtcdSimpleConfig(host, port) {
   this.store = {};
 };
 
+var getNodeValue = function(node) {
+  var val = node.value;
+  try {
+    val = JSON.parse(val);
+  } catch(e) {};
+  if (val && val._value) {
+    val = val._value;
+  }
+  return val;
+};
+
 var traverseObject = function(node, parentKey) {
   var obj = {};
   if (!node || !node.key) {
@@ -35,11 +46,7 @@ var traverseObject = function(node, parentKey) {
       obj[nodeKey] = tmp;
     });
   } else {
-    var val = node.value;
-    try {
-      val = JSON.parse(node.value);
-    } catch(e) {};
-    return val;
+    return getNodeValue(node);
   }
 
   return obj;
@@ -61,7 +68,7 @@ EtcdSimpleConfig.prototype.set = function(prefix, obj) {
 
   Object.keys(values).forEach(function(key){
     process.env.DEBUG && console.log('setSync', prefix +'/'+ key, values[key]);
-    self.etcd.setSync(prefix +'/'+ key, values[key]);
+    self.etcd.setSync(prefix +'/'+ key, JSON.stringify({ _value: values[key] }));
   });
 };
 
@@ -103,7 +110,7 @@ EtcdSimpleConfig.prototype.bind = function(prefix, defaultObj, watch) {
           delete pointer[parts[0]];
         }
       } else {
-        change[changeKey] = req.node.value;
+        change[changeKey] = getNodeValue(req.node);
       }
 
       var change = unflatten(change, { safe: true, delimiter: '/' });
