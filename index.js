@@ -3,6 +3,7 @@ var flatten = require('flat');
 var unflatten = flatten.unflatten;
 var extend = require('extend');
 var EventEmitter = require('events').EventEmitter;
+var cluster = require('cluster');
 
 function EtcdSimpleConfig(host, port) {
   if (host instanceof Array){
@@ -67,8 +68,9 @@ EtcdSimpleConfig.prototype.bind = function(prefix, defaultObj, watch) {
   var existing = this.get(prefix);
   var obj = extend(defaultObj, existing);
   this.store[prefix] = obj;
-  this.set(prefix, obj);
-
+  if (cluster.isMaster) {
+    this.set(prefix, obj);
+  }
   if (watch) {
     var watcher = this.etcd.watcher(prefix, null, {recursive: true});
 
