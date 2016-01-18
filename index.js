@@ -20,7 +20,7 @@ var getNodeValue = function(node) {
   try {
     val = JSON.parse(val);
   } catch(e) {};
-  if (val && val._value) {
+  if (val && ('_value' in val)) {
     val = val._value;
   }
   return val;

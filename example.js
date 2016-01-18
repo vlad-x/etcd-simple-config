@@ -5,6 +5,7 @@ var etcdConfig = new EtcdSimpleConfig('127.0.0.1', 4001);
 var defaultConfig = {
 	title: 'Hello world',
 	max_requests: 10,
+	null_value: null,
 	mongo: {
 		name: 'test',
 		host: '127.0.0.1',
