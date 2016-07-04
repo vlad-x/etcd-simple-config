@@ -8,9 +8,9 @@ var cluster = require('cluster');
 
 function EtcdSimpleConfig(host, port) {
   if (host instanceof Array){
-    this.etcd = new Etcd(host, arguments[3], arguments[4]);
+    this.etcd = new Etcd(host, arguments[1]);
   } else {
-    this.etcd = new Etcd(host, port, arguments[3], arguments[4]);
+    this.etcd = new Etcd(host+":"+port, arguments[2]);
   }
   this.store = {};
 };
