@@ -5,21 +5,26 @@ var extend = require('extend');
 var subordinate = require('subordinate');
 var EventEmitter = require('events').EventEmitter;
 var cluster = require('cluster');
+var util = require('util');
 
 function EtcdSimpleConfig(host, port) {
+  EventEmitter.call(this);
+
   if (host instanceof Array){
     this.etcd = new Etcd(host, arguments[1]);
   } else {
     this.etcd = new Etcd(host+":"+port, arguments[2]);
   }
   this.store = {};
-};
+}
+
+util.inherits(EtcdSimpleConfig, EventEmitter);
 
 var getNodeValue = function(node) {
   var val = node.value;
   try {
     val = JSON.parse(val);
-  } catch(e) {};
+  } catch(e) {}
   if (val && typeof val === "object" && ('_value' in val)) {
     val = val._value;
   }
@@ -59,10 +64,6 @@ EtcdSimpleConfig.prototype.get = function(key) {
 
 
 EtcdSimpleConfig.prototype.set = function(prefix, obj) {
-  if (typeof key == 'object' && !obj) {
-    obj = key;
-    key = '/';
-  }
   var values = flatten(obj, { safe: true, delimiter: '/' });
   var self = this;
 
@@ -70,6 +71,13 @@ EtcdSimpleConfig.prototype.set = function(prefix, obj) {
     process.env.DEBUG && console.log('setSync', prefix +'/'+ key, values[key]);
     self.etcd.setSync(prefix +'/'+ key, JSON.stringify({ _value: values[key] }));
   });
+};
+
+EtcdSimpleConfig.prototype.toJSON = function(prefix) {
+  if (prefix) {
+    return JSON.parse(JSON.stringify(this.store[prefix]));
+  }
+  return JSON.parse(JSON.stringify(this.store));
 };
 
 EtcdSimpleConfig.prototype.bind = function(prefix, defaultObj, watch) {
@@ -81,10 +89,6 @@ EtcdSimpleConfig.prototype.bind = function(prefix, defaultObj, watch) {
   }
   if (watch) {
     var watcher = this.etcd.watcher(prefix, null, {recursive: true});
-
-    var e = new EventEmitter();
-    obj.__proto__ = e.__proto__;
-
     var self = this;
     watcher.on('change', function(req) {
       var changeKey = req.node.key.replace(prefix, '');
@@ -125,12 +129,12 @@ EtcdSimpleConfig.prototype.bind = function(prefix, defaultObj, watch) {
         if (typeof watch == 'function') {
           watch(changeKey, change);
         }
-        obj.emit('change', changeKey, change);
-        obj.emit('change:'+changeKey, change);
+        self.emit('change', changeKey, change);
+        self.emit('change:'+changeKey, change);
       }
     });
   }
-  return obj;
+  return this;
 };
 
 module.exports = EtcdSimpleConfig;

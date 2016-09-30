@@ -24,6 +24,9 @@ Get config
 #### etcdConfig.set(prefix, obj)
 Add or update values
 
+#### etcdConfig.toJSON(prefix)
+Get config, merged with defaultConfig
+
 ## Listening for events instead of using the change callback
 
 Listen for the 'change' event
