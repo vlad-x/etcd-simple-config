@@ -24,7 +24,7 @@ var config = etcdConfig.bind(prefix, defaultConfig, function(key, change){
 	console.log('Config changed', change, config);
 });
 
-console.log('config', config, process.pid)
+console.log('config', config.toJSON(prefix), process.pid);
 
 if (cluster.isMaster) {
 	for (var i=0; i<3; i++) {

@@ -24,7 +24,7 @@ var config = etcdConfig.bind(prefix, defaultConfig, function(key, change){
 	console.log('Config changed', change, config);
 });
 
-console.log('config', config);
+console.log('config', config.toJSON(prefix));
 
 // or listen for the 'change' event instead of the callback
 config.on('change', function(key, change){
