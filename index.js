@@ -82,8 +82,9 @@ EtcdSimpleConfig.prototype.toJSON = function(prefix) {
 
 EtcdSimpleConfig.prototype.bind = function(prefix, defaultObj, watch) {
   var existing = this.get(prefix);
-  var obj = extend(defaultObj, existing);
+  var obj = extend(true, defaultObj, existing);
   this.store[prefix] = obj;
+
   if (cluster.isMaster) {
     this.set(prefix, obj);
   }

@@ -7,6 +7,7 @@ var defaultConfig = {
 	max_requests: 10,
 	null_value: null,
 	mongo: {
+		hello: 123,
 		name: 'test',
 		host: '127.0.0.1',
 		port: 27017
